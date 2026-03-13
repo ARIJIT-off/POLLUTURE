@@ -343,14 +343,33 @@ html, body {
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-bright);
   border-radius: 20px;
-  padding: 8px 18px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  pointer-events: none;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: var(--text-primary);
+  pointer-events: auto; /* allow clicking the finish button */
   z-index: 500;
   transition: opacity 0.4s;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
-.map-hint.hidden { opacity: 0; }
+.map-hint.hidden { opacity: 0; pointer-events: none; }
+
+.finish-btn {
+  background: var(--accent);
+  color: #0a0f0d;
+  border: none;
+  border-radius: 14px;
+  padding: 6px 16px;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.finish-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--accent-glow); }
+.finish-btn.hidden { display: none; }
+.hint-esc { font-size: 11px; color: var(--text-muted); }
+
 
 /* 3D building canvas overlay */
 #building-canvas {

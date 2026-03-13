@@ -90,9 +90,9 @@ function startDrawing() {
   state.drawPoints = [];
   state.map.getContainer().style.cursor = 'crosshair';
 
-  // Show hint
-  const hint = document.getElementById('draw-hint');
-  hint.classList.remove('hidden');
+  // Show hint and finish button
+  document.getElementById('draw-hint').classList.remove('hidden');
+  document.getElementById('btn-finish-draw').classList.add('hidden');
 
   // Update button state
   document.getElementById('btn-draw-zone').classList.add('active');
@@ -117,17 +117,38 @@ function clearDrawPreview() {
 function onMapClick(e) {
   if (!state.drawing) return;
   const latlng = e.latlng;
+
+  // Prevent double-clicking adding a point too close to the last one
+  if (state.drawPoints.length > 0) {
+    const last = state.drawPoints[state.drawPoints.length - 1];
+    if (latlng.distanceTo(last) < 1) return; 
+  }
+
   state.drawPoints.push(latlng);
 
   // Draw vertex marker
   const marker = L.circleMarker(latlng, {
-    radius: 5,
+    radius: 7,
     color: '#28e07a',
     fillColor: '#28e07a',
     fillOpacity: 1,
     weight: 2,
   }).addTo(state.map);
+  
+  // Click first marker to close
+  if (state.drawPoints.length === 1) {
+    marker.on('click', (ev) => {
+      L.DomEvent.stopPropagation(ev);
+      if (state.drawPoints.length >= 3) finishDrawing();
+    });
+  }
+
   state.drawMarkers.push(marker);
+
+  // Show finish button if we have at least 3 points
+  if (state.drawPoints.length >= 3) {
+    document.getElementById('btn-finish-draw').classList.remove('hidden');
+  }
 
   // Update preview polyline
   if (state.drawPolyline) state.map.removeLayer(state.drawPolyline);
@@ -561,6 +582,7 @@ function polygonArea(latlngs) {
 function wire() {
   // Draw zone button
   document.getElementById('btn-draw-zone').addEventListener('click', startDrawing);
+  document.getElementById('btn-finish-draw').addEventListener('click', finishDrawing);
 
   // Tile switcher
   document.querySelectorAll('.tile-btn').forEach(btn => {

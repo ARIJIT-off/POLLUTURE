@@ -522,10 +522,14 @@ function showResultsPanel() {
   const rp = document.getElementById('results-panel');
   rp.classList.remove('hidden'); 
   rp.classList.remove('collapsed');
+  const btn = document.getElementById('btn-toggle-drawer');
+  if (btn) btn.innerText = '﹀';
   setTimeout(() => state.map.invalidateSize(), 350);
 }
 function hideResultsPanel() { 
   document.getElementById('results-panel').classList.add('collapsed');
+  const btn = document.getElementById('btn-toggle-drawer');
+  if (btn) btn.innerText = '︿';
   setTimeout(() => state.map.invalidateSize(), 350);
 }
 function updateResultsPanelVisibility() {
@@ -669,11 +673,11 @@ function wire() {
     setTimeout(() => state.map.invalidateSize(), 350);
   });
 
-  document.getElementById('btn-toggle-right').addEventListener('click', (e) => {
+  document.getElementById('btn-toggle-drawer').addEventListener('click', (e) => {
     const rp = document.getElementById('results-panel');
     rp.classList.toggle('collapsed');
     rp.classList.remove('hidden'); 
-    e.target.innerText = rp.classList.contains('collapsed') ? '‹' : '›';
+    e.target.innerText = rp.classList.contains('collapsed') ? '︿' : '﹀';
     setTimeout(() => state.map.invalidateSize(), 350);
   });
 }

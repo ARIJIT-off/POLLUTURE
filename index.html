@@ -119,7 +119,6 @@
   <!-- ──────── MAP ──────── -->
   <div id="map-container">
     <button id="btn-toggle-left" class="sidebar-toggle left" title="Toggle Sidebar">‹</button>
-    <button id="btn-toggle-right" class="sidebar-toggle right collapsed" title="Toggle Results">›</button>
     <div id="map"></div>
 
     <!-- Draw toolbar hint -->
@@ -131,26 +130,30 @@
 
     <!-- 3D Building canvas overlay -->
     <canvas id="building-canvas" width="200" height="220"></canvas>
+    <!-- ──────── RESULTS DRAWER ──────── -->
+    <aside id="results-panel" class="collapsed">
+      <button id="btn-toggle-drawer" class="drawer-toggle" title="Toggle Results">︿</button>
+      
+      <div class="results-layout">
+        <div class="results-header">
+          <h2 id="results-title">📊 Impact Report</h2>
+          <button id="btn-close-results" class="icon-btn">✕</button>
+        </div>
+
+        <!-- Combined Ecological Debt (shown when multiple zones calculated) -->
+        <div id="combined-debt-bar" class="combined-debt hidden">
+          <div class="combined-debt-label">🌍 Combined Ecological Debt</div>
+          <div id="combined-debt-value" class="combined-debt-value">₹ 0</div>
+        </div>
+      </div>
+
+      <!-- Results content (horizontal scrolling) -->
+      <div id="results-content" class="results-content">
+        <!-- Individual zone result cards injected here -->
+      </div>
+    </aside>
+
   </div>
-
-  <!-- ──────── RESULTS PANEL ──────── -->
-  <aside id="results-panel" class="hidden">
-    <div class="results-header">
-      <h2 id="results-title">📊 Impact Report</h2>
-      <button id="btn-close-results" class="icon-btn">✕</button>
-    </div>
-
-    <!-- Combined Ecological Debt (shown when multiple zones calculated) -->
-    <div id="combined-debt-bar" class="combined-debt hidden">
-      <div class="combined-debt-label">🌍 Combined Ecological Debt</div>
-      <div id="combined-debt-value" class="combined-debt-value">₹ 0</div>
-    </div>
-
-    <!-- Results content (scrollable) -->
-    <div id="results-content" class="results-content">
-      <!-- Individual zone result cards injected here -->
-    </div>
-  </aside>
 
 </div>
 

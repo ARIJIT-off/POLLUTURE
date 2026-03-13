@@ -517,9 +517,17 @@ function updateCombinedDebt() {
   }
 }
 
-// ══════════════════════════════════════════ RESULTS PANEL
-function showResultsPanel() { document.getElementById('results-panel').classList.remove('hidden'); }
-function hideResultsPanel() { document.getElementById('results-panel').classList.add('hidden'); }
+// ══════════════════════════════════════════ RESULTS PANEL (COLLAPSIBLE)
+function showResultsPanel() { 
+  const rp = document.getElementById('results-panel');
+  rp.classList.remove('hidden'); 
+  rp.classList.remove('collapsed');
+  setTimeout(() => state.map.invalidateSize(), 350);
+}
+function hideResultsPanel() { 
+  document.getElementById('results-panel').classList.add('collapsed');
+  setTimeout(() => state.map.invalidateSize(), 350);
+}
 function updateResultsPanelVisibility() {
   if (!state.zones.some(z => z.result)) hideResultsPanel();
 }
@@ -652,6 +660,22 @@ function wire() {
 
   // Close results panel
   document.getElementById('btn-close-results').addEventListener('click', hideResultsPanel);
+
+  // Sidebar Toggles
+  document.getElementById('btn-toggle-left').addEventListener('click', (e) => {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('collapsed');
+    e.target.innerText = sb.classList.contains('collapsed') ? '›' : '‹';
+    setTimeout(() => state.map.invalidateSize(), 350);
+  });
+
+  document.getElementById('btn-toggle-right').addEventListener('click', (e) => {
+    const rp = document.getElementById('results-panel');
+    rp.classList.toggle('collapsed');
+    rp.classList.remove('hidden'); 
+    e.target.innerText = rp.classList.contains('collapsed') ? '‹' : '›';
+    setTimeout(() => state.map.invalidateSize(), 350);
+  });
 }
 
 // ══════════════════════════════════════════ BOOTSTRAP
@@ -659,3 +683,4 @@ function wire() {
   initMap();
   wire();
 })();
+

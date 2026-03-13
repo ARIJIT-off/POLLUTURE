@@ -126,7 +126,58 @@ html, body {
   flex-direction: column;
   gap: 0;
   z-index: 100;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), border 0.3s;
+  position: relative;
 }
+
+#sidebar.collapsed {
+  width: 0;
+  border-right-color: transparent;
+  overflow: visible; /* to show the handle */
+}
+
+#sidebar.collapsed > *:not(.sidebar-toggle) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar Toggle Handles (now inside #map-container) */
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-bright);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 18px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-card);
+}
+.sidebar-toggle:hover {
+  background: var(--accent-glow);
+  color: #fff;
+}
+
+.sidebar-toggle.left {
+  left: 0;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+}
+
+.sidebar-toggle.right {
+  right: 0;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+}
+
+
 
 .sidebar-section {
   padding: 16px;
@@ -430,13 +481,25 @@ html, body {
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width 0.3s ease;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), border 0.3s;
+  position: relative;
 }
-#results-panel.hidden {
+
+#results-panel.collapsed {
   width: 0;
-  overflow: hidden;
-  border: none;
+  border-left-color: transparent;
+  overflow: visible;
 }
+
+#results-panel.collapsed > *:not(.sidebar-toggle) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Toggle Arrow Flip */
+#sidebar.collapsed #btn-toggle-left { transform: translateY(-50%) scaleX(-1); }
+#results-panel.collapsed #btn-toggle-right { transform: translateY(-50%) scaleX(-1); }
+
 
 .results-header {
   display: flex;

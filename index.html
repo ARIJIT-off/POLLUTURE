@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polluture — Ecological Impact Mapper</title>
+  <meta name="description" content="Draw zones on real Kolkata maps and compute ecological debt, AQI, groundwater loss, and temperature rise from land-use change." />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- no Leaflet Draw needed -->
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<header id="app-header">
+  <div class="header-brand">
+    <div class="header-logo">🌿</div>
+    <div class="header-title">
+      <span class="brand-name">Polluture</span>
+      <span class="brand-sub">Ecological Impact Mapper · Kolkata</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button id="btn-compare" class="hdr-btn secondary" title="Compare all zones">⚖ Compare</button>
+    <button id="btn-clear-all" class="hdr-btn danger" title="Clear all polygons">🗑 Clear All</button>
+    <button id="btn-reset" class="hdr-btn ghost" title="Reset app">↺ Reset</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN LAYOUT -->
+<div id="app-layout">
+
+  <!-- ──────── LEFT SIDEBAR ──────── -->
+  <aside id="sidebar">
+
+    <!-- Zone List -->
+    <section class="sidebar-section" id="zone-list-section">
+      <div class="section-header">
+        <h2>🗺 Zones</h2>
+        <span id="zone-count-badge" class="badge">0</span>
+      </div>
+      <button id="btn-draw-zone" class="draw-zone-btn">
+        <span>✏️ Draw New Zone</span>
+      </button>
+      <div id="zone-list" class="zone-list">
+        <div class="zone-empty">
+          <div class="zone-empty-icon">🗺️</div>
+          <p>Click "Draw New Zone", then click on the map to place points. Double-click to finish.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tile Layer Switcher -->
+    <section class="sidebar-section">
+      <div class="section-header"><h2>🗺 Map Layer</h2></div>
+      <div class="tile-switcher">
+        <button class="tile-btn active" data-layer="street">🗺 Street</button>
+        <button class="tile-btn" data-layer="satellite">🛰 Satellite</button>
+        <button class="tile-btn" data-layer="hybrid">🌐 Hybrid</button>
+      </div>
+    </section>
+
+    <!-- Per-polygon Config Panel -->
+    <section class="sidebar-section" id="config-section" style="display:none;">
+      <div class="section-header">
+        <h2 id="config-zone-label">⚙ Zone Config</h2>
+        <button id="btn-delete-zone" class="icon-btn danger" title="Delete this zone">🗑</button>
+      </div>
+
+      <!-- Land Type -->
+      <div class="config-group">
+        <label class="config-label">🌍 Land Type</label>
+        <div class="land-type-grid" id="land-type-grid">
+          <button class="land-btn" data-type="wetland">🌊 Wetland / Lake</button>
+          <button class="land-btn" data-type="vegetation">🌿 Dense Vegetation</button>
+          <button class="land-btn" data-type="agricultural">🌾 Agricultural</button>
+          <button class="land-btn" data-type="bare">🟫 Open / Bare Land</button>
+        </div>
+      </div>
+
+      <!-- Floors -->
+      <div class="config-group">
+        <label class="config-label">🏗 Floors <span id="floors-val" class="val-badge">5</span></label>
+        <input type="range" id="slider-floors" class="slider" min="1" max="30" value="5" />
+      </div>
+
+      <!-- Residents -->
+      <div class="config-group">
+        <label class="config-label">👥 Residents <span id="residents-val" class="val-badge">200</span></label>
+        <input type="range" id="slider-residents" class="slider" min="10" max="1000" value="200" />
+      </div>
+
+      <!-- Years -->
+      <div class="config-group">
+        <label class="config-label">📅 Horizon <span id="years-val" class="val-badge">25 yrs</span></label>
+        <input type="range" id="slider-years" class="slider" min="5" max="100" value="25" />
+      </div>
+
+      <!-- Zone area -->
+      <div class="config-group">
+        <div class="area-display">
+          <span>📐 Zone area:</span>
+          <span id="zone-area-display" class="area-value">— ha</span>
+        </div>
+      </div>
+
+      <!-- Calculate button -->
+      <button id="btn-calculate" class="calc-btn">
+        <span>⚡ Calculate Impact</span>
+      </button>
+    </section>
+  </aside>
+
+  <!-- ──────── MAP ──────── -->
+  <div id="map-container">
+    <div id="map"></div>
+
+    <!-- Draw toolbar hint -->
+    <div id="draw-hint" class="map-hint hidden">
+      <span>🖱️ Click to place points · Double-click to finish · Esc to cancel</span>
+    </div>
+
+    <!-- 3D Building canvas overlay -->
+    <canvas id="building-canvas" width="200" height="220"></canvas>
+  </div>
+
+  <!-- ──────── RESULTS PANEL ──────── -->
+  <aside id="results-panel" class="hidden">
+    <div class="results-header">
+      <h2 id="results-title">📊 Impact Report</h2>
+      <button id="btn-close-results" class="icon-btn">✕</button>
+    </div>
+
+    <!-- Combined Ecological Debt (shown when multiple zones calculated) -->
+    <div id="combined-debt-bar" class="combined-debt hidden">
+      <div class="combined-debt-label">🌍 Combined Ecological Debt</div>
+      <div id="combined-debt-value" class="combined-debt-value">₹ 0</div>
+    </div>
+
+    <!-- Results content (scrollable) -->
+    <div id="results-content" class="results-content">
+      <!-- Individual zone result cards injected here -->
+    </div>
+  </aside>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ COMPARE MODAL -->
+<div id="compare-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>⚖ Zone Comparison</h2>
+      <button id="btn-close-compare" class="icon-btn">✕</button>
+    </div>
+    <div id="compare-content" class="compare-grid">
+      <!-- Cards injected here -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPTS -->
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<!-- CountUp.js -->
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
+
+<!-- App modules -->
+<script src="js/calculator.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/timeline.js"></script>
+<script src="js/building3d.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
